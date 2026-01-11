@@ -1,0 +1,158 @@
+/* 
+  PogokLink Global Styles 
+  (Tailwind is used for utility, this file is for specific overrides and complex components)
+*/
+
+/* Font Family */
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+/* Calendar Overrides */
+.fc {
+    background: white;
+    border-radius: 0.5rem;
+    /* rounded-lg */
+    --fc-border-color: #e5e7eb;
+    /* gray-200 */
+    --fc-button-bg-color: #ffffff;
+    --fc-button-border-color: #d1d5db;
+    /* gray-300 */
+    --fc-button-text-color: #374151;
+    /* gray-700 */
+    --fc-button-hover-bg-color: #f3f4f6;
+    /* gray-50 */
+    --fc-button-hover-border-color: #9ca3af;
+    /* gray-400 */
+    --fc-button-active-bg-color: #e5e7eb;
+    /* gray-200 */
+    --fc-button-active-border-color: #6b7280;
+    /* gray-500 */
+    --fc-today-bg-color: #faf5ff;
+    /* purple-50 */
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.25rem;
+    /* text-xl */
+    font-weight: 700;
+}
+
+/* Event Styling */
+.fc-event {
+    cursor: pointer;
+    border: none;
+    padding: 1px 2px;
+    font-size: 0.85rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Background Events (Holidays) */
+.holiday-bg-event {
+    background-color: #fee2e2 !important;
+    /* red-100 */
+    opacity: 0.4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Print Styles - Advanced */
+@media print {
+
+    /* Hide everything initially */
+    body>* {
+        display: none !important;
+    }
+
+    /* Only show the view container (Calendar) */
+    /* Note: We move the #view-container to be top level during print or toggle visibility */
+    body>#app {
+        display: block !important;
+    }
+
+    #app>header,
+    #app>footer,
+    #app>#modal-container {
+        display: none !important;
+    }
+
+    #main-content {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* Sidebar hide */
+    aside {
+        display: none !important;
+    }
+
+    /* Calendar Container fill */
+    .lg\:flex-row {
+        display: block !important;
+    }
+
+    .lg\:w-64 {
+        display: none !important;
+    }
+
+    .flex-grow {
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    /* FullCalendar Print Optimization */
+    .fc-header-toolbar {
+        margin-bottom: 1rem !important;
+    }
+
+    .fc-toolbar-chunk:nth-child(3) {
+        /* Right buttons (month/week/list) */
+        display: none !important;
+    }
+
+    /* Orientation & Size Injection via Setup */
+    /* Browsers respect @page size, but typically user has to confirm in dialog */
+    @page {
+        margin: 10mm;
+        size: auto;
+        /* Allow CSS to hint */
+    }
+
+    /* Utility classes injected by JS before print */
+    body.print-landscape {
+        @page {
+            size: landscape;
+        }
+    }
+
+    body.print-portrait {
+        @page {
+            size: portrait;
+        }
+    }
+
+    body.print-a4.print-landscape {
+        @page {
+            size: A4 landscape;
+        }
+    }
+
+    body.print-b4.print-landscape {
+        @page {
+            size: B4 landscape;
+        }
+    }
+
+    /* Fit to one page optimization */
+    body.print-scale .fc {
+        font-size: 0.75rem;
+        /* Smaller text */
+    }
+
+    body.print-scale .fc-event {
+        padding: 0 1px;
+    }
+}

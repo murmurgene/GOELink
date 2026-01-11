@@ -1,0 +1,69 @@
+<div class="flex flex-col lg:flex-row gap-6 h-full">
+    <!-- Sidebar / Filters -->
+    <aside class="w-full lg:w-64 flex-shrink-0 no-print">
+        <!-- Mobile Toggle -->
+        <div class="lg:hidden mb-4">
+            <button id="btn-toggle-filters"
+                class="w-full bg-white border border-gray-300 rounded px-4 py-2 flex items-center justify-between text-gray-700 font-medium">
+                <span>🔍 부서 필터 & 메뉴</span>
+                <span class="material-symbols-outlined transform transition-transform"
+                    id="icon-filter-toggle">expand_more</span>
+            </button>
+        </div>
+
+        <!-- Sidebar Content (Hidden on mobile by default) -->
+        <div id="sidebar-content" class="hidden lg:block space-y-4">
+            <!-- Search -->
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="relative">
+                    <input type="text" id="search-schedule" placeholder="일정 검색..."
+                        class="w-full border rounded pl-8 pr-2 py-2 text-sm focus:ring-2 focus:ring-purple-500">
+                    <span class="material-symbols-outlined absolute left-2 top-2.5 text-gray-400 text-sm">search</span>
+                </div>
+                <!-- Search Results Dropdown/List -->
+                <div id="search-results" class="hidden mt-2 max-h-40 overflow-y-auto text-sm border-t pt-2 space-y-1">
+                    <!-- Results injected here -->
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="font-bold text-gray-700">부서 필터</h3>
+                    <button id="btn-refresh" class="text-gray-400 hover:text-gray-700" title="새로고침">
+                        <span class="material-symbols-outlined text-sm">refresh</span>
+                    </button>
+                </div>
+                <div id="dept-filter-list"
+                    class="space-y-2 text-sm max-h-48 overflow-y-auto lg:max-h-none lg:overflow-visible">
+                    <!-- Checkboxes injected by JS -->
+                    <div class="animate-pulse flex space-x-2">
+                        <div class="rounded-full bg-slate-200 h-4 w-4"></div>
+                        <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+                    </div>
+                    <div class="animate-pulse flex space-x-2">
+                        <div class="rounded-full bg-slate-200 h-4 w-4"></div>
+                        <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <button id="btn-add-schedule"
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-2 transition">
+                    <span class="material-symbols-outlined">add</span> 일정 등록
+                </button>
+                <button id="btn-print-modal"
+                    class="w-full mt-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded flex items-center justify-center gap-2 transition">
+                    <span class="material-symbols-outlined">print</span> 인쇄
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Calendar Container -->
+    <div class="flex-grow bg-white rounded-lg shadow p-2 sm:p-4 min-h-[600px] relative">
+        <div id="calendar" class="h-full"></div>
+    </div>
+</div>
+
+<!-- Event Detail/Edit Modal is handled globally in App.js -->
