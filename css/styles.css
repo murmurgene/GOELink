@@ -38,7 +38,9 @@ body {
 
 /* Hide background events background color on today to let priority color show */
 .fc-day-today .holiday-bg-event,
-.fc-day-today .vacation-bg-event {
+.fc-day-today .vacation-bg-event,
+.fc-day-today .event-exam-text,
+.fc-day-today .event-major-text {
     background-color: transparent !important;
 }
 
@@ -52,9 +54,30 @@ body {
     background: white;
     border: 1px solid #e5e7eb; /* Ensure border is visible */
 }
+/* Ensure all day cells in a row have equal height and fill the row */
+.fc-daygrid-day-frame {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Hide the default events container to let custom content fill the height */
+.fc-daygrid-day-events {
+    display: none !important;
+}
+
+/* Ensure the main top container fills the frame */
+.fc-daygrid-day-top {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+}
+
 /* Gray background for days not in current month */
+/* Gray background removed as per request */
 .fc-day-other .fc-daygrid-day-frame {
-    background-color: #f9fafb; /* gray-50 */
+    background-color: transparent;
 }
 
 /* Calendar Header Styling */
@@ -75,6 +98,18 @@ body {
     font-weight: 700;
 }
 
+/* Day Header (Mon, Tue, etc.) Styling */
+.fc-col-header-cell {
+    background-color: #ede9fe !important; /* purple-100 */
+    padding: 8px 0 !important;
+}
+
+/* Ensure the calendar toolbar doesn't scroll */
+.fc-header-toolbar {
+    margin-bottom: 0.5rem !important;
+    padding: 2px 4px !important;
+}
+
 /* Event Styling */
 .fc-event {
     cursor: pointer;
@@ -86,9 +121,9 @@ body {
 
 /* Background Events (Holidays) */
 .holiday-bg-event {
-    background-color: #fef2f2 !important;
-    /* red-50 */
-    border: 1px solid #fee2e2 !important;
+    background-color: transparent !important;
+    /* red-50 managed in JS headerRow */
+    border: none !important;
     color: transparent !important; /* Hide text in the middle */
     opacity: 1 !important;
     pointer-events: none;
@@ -96,8 +131,8 @@ body {
 
 /* Vacation Periods (Extremely light pink) */
 .vacation-bg-event {
-    background-color: #fffcfc !important; /* Even lighter pink */
-    border: 1px solid #fff9f9 !important;
+    background-color: transparent !important; /* Managed in JS headerRow */
+    border: none !important;
     color: transparent !important;
     opacity: 1 !important;
     pointer-events: none;
@@ -113,10 +148,19 @@ body {
 /* Date Number Font Size & Weight */
 .fc .fc-daygrid-day-number {
     font-size: 10px !important;
-    padding: 2px 4px !important;
+    padding: 0 !important; /* Offset managed via headerGroup paddingTop in JS */
     font-weight: 800 !important; /* Extra Bold */
     color: #1f2937; /* gray-800 default */
+    
+    /* Ensure the wrapper fills the entire cell height for sticky tracking */
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    height: 100% !important;
+    width: 100% !important;
+    text-decoration: none !important;
 }
+
 
 /* Red Dates for Sundays ("fc-day-sun"), Saturdays ("fc-day-sat"), and Holidays ("is-holiday") */
 .fc-day-sun .fc-daygrid-day-number,
@@ -136,12 +180,17 @@ body {
 }
 
 /* Ensure day top flex alignment */
+/* Ensure day top fills the cell for custom rendering */
+/* Already handled above, keeping here for specificity if needed */
 .fc-daygrid-day-top {
-    flex-direction: row !important;
-    justify-content: flex-start !important; /* Allow internal containers to determine alignment */
-    align-items: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    height: 100% !important;
+    width: 100% !important;
     position: relative !important;
-    z-index: 5 !important; /* Ensure it's above background events */
+    z-index: 5 !important;
+    min-height: 100% !important; /* Force min-height */
 }
 
 /* Triangle indicator for days in the current month */
@@ -265,4 +314,35 @@ body {
     body.print-scale .fc-event {
         padding: 0 1px;
     }
+}
+
+/* Custom Scrollbar Styling (Thinner) */
+.fc-scroller {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #d1d5db transparent; /* Firefox */
+}
+
+/* Hide redundant scrollbar in the header row */
+.fc-scrollgrid-section-header .fc-scroller {
+    overflow: hidden !important;
+}
+
+
+.fc-scroller::-webkit-scrollbar {
+    width: 6px; /* Thinner vertical scrollbar */
+    height: 6px; /* Thinner horizontal scrollbar */
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+    background-color: #d1d5db; /* gray-300 */
+    border-radius: 20px;
+    border: 1px solid transparent;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af; /* gray-400 */
 }

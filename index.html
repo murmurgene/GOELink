@@ -59,9 +59,9 @@
 <body class="bg-gray-50 text-gray-800 font-sans antialiased">
 
     <!-- App Root Container -->
-    <div id="app" class="min-h-screen flex flex-col">
+    <div id="app" class="h-screen flex flex-col overflow-hidden">
         <!-- Header / Navigation -->
-        <header id="main-header" class="bg-white shadow-sm z-10 sticky top-0 no-print">
+        <header id="main-header" class="bg-white shadow-sm z-50 flex-shrink-0 no-print">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-purple-600 text-3xl">calendar_month</span>
@@ -77,13 +77,13 @@
         </header>
 
         <!-- Main Content Area -->
-        <main id="main-content" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <main id="main-content" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 overflow-hidden flex flex-col">
             <div id="loading-spinner" class="flex justify-center items-center h-64">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
             </div>
 
             <!-- Views will be injected here -->
-            <div id="view-container" class="hidden"></div>
+            <div id="view-container" class="hidden flex-grow flex flex-col min-h-0"></div>
         </main>
 
         <!-- Footer -->

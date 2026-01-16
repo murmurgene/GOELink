@@ -1883,7 +1883,7 @@ const App = {
                 month: '월',
                 list: '목록'
             },
-            height: 'auto',
+            height: '100%',
             dayMaxEvents: false,
             weekends: false, 
             firstDay: 1, // Start on Monday
@@ -1897,13 +1897,14 @@ const App = {
             dayCellClassNames: (arg) => {
                 const dateStr = this.formatLocal(arg.date);
                 const data = this.state.calendarData || { redDayMap: {}, holidayMap: {} };
+                const day = arg.date.getDay();
                 
-                if (data.redDayMap[dateStr]) return ['is-holiday'];
+                // 1. Forced Red (Holidays, Special Red Days)
+                if (data.redDayMap && data.redDayMap[dateStr]) return ['is-holiday'];
                 
-                if (data.holidayMap[dateStr]) {
-                    const d = arg.date.getDay();
-                    if (d === 0 || d === 6) return ['is-holiday'];
-                }
+                // 2. Weekends (Sunday=0, Saturday=6)
+                if (day === 0 || day === 6) return ['is-holiday'];
+                
                 return [];
             },
 
@@ -1923,6 +1924,9 @@ const App = {
 
         this.state.calendar = calendar;
         calendar.render();
+        
+        // Force size update for flexbox environments
+        setTimeout(() => calendar.updateSize(), 0);
 
         // 4. Weekend Toggle Initialization
         const weekendChk = document.getElementById('chk-show-weekends');
@@ -2041,7 +2045,10 @@ const App = {
                 let bgColor = '';
                 let isExam = false; 
 
-                if (item.type === 'vacation') {
+                // Forced Holiday from DB flag
+                if (item.is_holiday) {
+                    className = 'holiday-bg-event';
+                } else if (item.type === 'vacation') {
                      className = 'vacation-bg-event';
                 } else if (item.type === 'term') {
                      className = 'holiday-bg-event'; 
@@ -2050,11 +2057,11 @@ const App = {
                 } else if (item.type === 'exam') {
                      isExam = true;
                      className = 'event-exam-text';
-                     bgColor = '#fff7ed';
+                     bgColor = 'transparent';
                 } else if (item.type === 'event') {
                      // Major Events
                      className = 'event-major-text';
-                     bgColor = '#eff6ff';
+                     bgColor = 'transparent';
                 }
 
                 // Add to Reference Map
@@ -2077,7 +2084,7 @@ const App = {
                     let loop = 0;
                     
                     while (current <= endDate && loop < 365) {
-                        const dStr = current.toISOString().split('T')[0];
+                        const dStr = this.formatLocal(current);
                         addAdminRef(dStr, item.name);
                         events.push({
                             start: dStr,
@@ -3028,11 +3035,13 @@ const App = {
             academicYears.push(cy);
         }
 
-        const [basicRows, departments, schedules] = await Promise.all([
+        const [basicRows, departmentsRes, schedules] = await Promise.all([
             window.SupabaseClient.supabase.from('basic_schedules').select('*').in('academic_year', academicYears),
-            this.fetchDepartments(),
+            window.SupabaseClient.supabase.from('departments').select('*').in('academic_year', academicYears).eq('is_active', true),
             this.fetchSchedules()
         ]);
+
+        const departments = departmentsRes.data || [];
 
         this.state.departments = departments;
         this.state.schedules = schedules; 
@@ -3040,6 +3049,7 @@ const App = {
         const data = {
             holidayMap: {},
             redDayMap: {},
+            bgColorMap: {}, // ADDED: To store background color for header only
             scheduleMap: {},
             backgroundEvents: [],
             departments: this.state.departments
@@ -3056,13 +3066,27 @@ const App = {
                      if (!data.holidayMap[dateKey]) data.holidayMap[dateKey] = [];
                      const label = e.extendedProps?.label || e.title;
                      if (label && !data.holidayMap[dateKey].includes(label)) data.holidayMap[dateKey].push(label);
-                     if (e.className.includes('holiday-bg-event')) data.redDayMap[dateKey] = true;
+                      if (e.className.includes('holiday-bg-event')) {
+                        data.redDayMap[dateKey] = true;
+                        data.bgColorMap[dateKey] = '#fef2f2'; // Holiday Red
+                      } else if (e.className.includes('vacation-bg-event')) {
+                        data.bgColorMap[dateKey] = '#fffcfc'; // Vacation Pink
+                      } else if (e.className.includes('event-exam-text')) {
+                        data.bgColorMap[dateKey] = '#fff7ed'; // Exam Orange
+                      } else if (e.className.includes('event-major-text')) {
+                        data.bgColorMap[dateKey] = '#eff6ff'; // Event Blue
+                      }
+                }
+                
+                // Also check vacation events if not caught above (though vacation usually doesn't have text classes, but let's be safe)
+                if (e.className.includes('vacation-bg-event')) {
+                    data.bgColorMap[dateKey] = '#fffcfc';
                 }
             } else {
                 let current = new Date(e.start);
                 const endEv = e.end ? new Date(e.end) : new Date(e.start);
                 let daysCount = 0;
-                while (current < endEv || (current.getTime() === endEv.getTime() && !e.end)) {
+                while (current <= endEv) {
                     if (daysCount > 365) break; 
                     const dKey = this.formatLocal(current);
                     if (!data.scheduleMap[dKey]) data.scheduleMap[dKey] = {};
@@ -3081,6 +3105,9 @@ const App = {
 
         this.state.calendarData = data;
         this.state.calendar.setOption('events', data.backgroundEvents);
+
+        // Force full rerender of the calendar to apply classes and cell content immediately
+        this.state.calendar.render();
     },
 
     renderCalendarCell: function(arg) {
@@ -3088,30 +3115,66 @@ const App = {
         const data = this.state.calendarData || { holidayMap: {}, redDayMap: {}, scheduleMap: {}, departments: [] };
 
         const container = document.createElement('div');
-        container.className = "flex flex-col h-full w-full justify-start items-start";
+        container.className = "flex flex-col w-full justify-start items-stretch flex-grow";
+        container.style.height = "100%"; // Explicitly set height for sticky track
+
+        // Group header and divider to apply background color up to the divider line
+        const headerGroup = document.createElement('div');
+        headerGroup.style.width = '100%';
+        headerGroup.style.display = 'flex';
+        headerGroup.style.flexDirection = 'column';
+        
+        // STICKY: Make the header stay at the top during scroll
+        headerGroup.style.position = 'sticky';
+        headerGroup.style.top = '0';
+        headerGroup.style.zIndex = '10';
+        
+        // Ensure a solid background even if not a holiday, so schedule text hides behind it
+        let cellBgColor = '#ffffff';
+        if (arg.isOther) {
+            cellBgColor = '#ffffff'; // White for non-current month days (no background)
+        } else if (data.bgColorMap && data.bgColorMap[dateStr]) {
+            cellBgColor = data.bgColorMap[dateStr];
+        }
+
+        headerGroup.style.backgroundColor = cellBgColor;
+                                            
+        headerGroup.style.paddingTop = '4px'; // COVERAGE: Padding is part of the colored area
+        // Separation from content below, OUTSIDE the colored area
+        headerGroup.style.marginBottom = '5px';
 
         const headerRow = document.createElement('div');
         headerRow.style.display = 'grid';
-        headerRow.style.gridTemplateColumns = '35px minmax(0, 1fr)';
+        headerRow.style.gridTemplateColumns = '42px minmax(0, 1fr)';
         headerRow.style.alignItems = 'baseline'; 
         headerRow.style.width = '100%';
         headerRow.style.marginBottom = '2px';
         
-        // 1. Day Number (Left)
+        // Background applied to headerGroup now
+
+        
+        // 1. Day Number (Left) - Wrapped
+        const dateWrapper = document.createElement('div');
+        dateWrapper.className = 'fc-daygrid-date-wrapper';
+        
         const dayLink = document.createElement('a');
         dayLink.className = "fc-daygrid-day-number";
         dayLink.style.whiteSpace = 'nowrap';
         dayLink.style.textAlign = 'left';
         dayLink.style.paddingLeft = '4px';
         dayLink.style.textDecoration = 'none';
-        dayLink.textContent = arg.dayNumberText;
-        headerRow.appendChild(dayLink);
+        // Add three spaces before the day number as requested
+        dayLink.textContent = '\u00A0\u00A0\u00A0' + arg.dayNumberText;
+        
+        dateWrapper.appendChild(dayLink);
+        headerRow.appendChild(dateWrapper);
 
         // 2. Holiday Names (Right)
         if (data.holidayMap[dateStr]) {
             const nameContainer = document.createElement('div');
+            nameContainer.className = 'fc-daygrid-holiday-wrapper'; // Add separate class
             nameContainer.style.overflow = 'hidden'; 
-            nameContainer.style.textAlign = 'right';
+            nameContainer.style.textAlign = 'left';
             nameContainer.style.lineHeight = '1.2';
             nameContainer.style.paddingTop = '1px'; 
             nameContainer.style.marginRight = '4px';
@@ -3119,7 +3182,7 @@ const App = {
             data.holidayMap[dateStr].forEach((name, index) => {
                 const itemSpan = document.createElement('span');
                 itemSpan.style.display = 'inline-block';
-                itemSpan.style.fontSize = '12px';
+                itemSpan.style.fontSize = '10px';
                 itemSpan.style.wordBreak = 'keep-all';
                 itemSpan.style.position = 'relative'; 
                 if (index > 0) itemSpan.style.marginLeft = '4px';
@@ -3143,7 +3206,15 @@ const App = {
             headerRow.appendChild(document.createElement('div'));
         }
 
-        container.appendChild(headerRow);
+        headerGroup.appendChild(headerRow);
+
+        // Add Dashed Divider (Inside the colored group)
+        const divider = document.createElement('div');
+        divider.style.margin = '1px 8px 0px 8px'; // Bottom margin is 0 here to keep color inside
+        divider.style.borderTop = '1px dashed #d1d5db'; // gray-300
+        
+        headerGroup.appendChild(divider);
+        container.appendChild(headerGroup);
 
         if (data.scheduleMap[dateStr]) {
             const groups = data.scheduleMap[dateStr];
@@ -3153,24 +3224,37 @@ const App = {
                 return idxA - idxB;
             });
 
-            sortedDeptIds.forEach(deptId => {
+            sortedDeptIds.forEach((deptId, idx) => {
                 const group = groups[deptId];
+                
+                // Add spacer between different departments
+                if (idx > 0) {
+                    const spacer = document.createElement('div');
+                    spacer.style.height = '12px';
+                    container.appendChild(spacer);
+                }
+
                 const deptDiv = document.createElement('div');
-                deptDiv.className = "w-full text-xs text-left mb-2 pl-1";
+                deptDiv.className = "w-full text-left mb-1 pl-1";
+                deptDiv.style.fontSize = '10px';
                 
                 const deptHeader = document.createElement('div');
                 deptHeader.className = "font-bold mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis";
                 deptHeader.style.color = '#000'; 
-                deptHeader.innerHTML = `<span style="color:${group.info.dept_color}">◈</span> ${group.info.dept_name}`;
+                // Displaying `◈ [dept_short]` format
+                const deptShort = group.info.dept_short || group.info.dept_name.substring(0, 2);
+                deptHeader.innerHTML = `<span style="color:${group.info.dept_color}">◈</span> ${deptShort}`;
                 deptDiv.appendChild(deptHeader);
 
                 group.events.forEach(ev => {
                     const evDiv = document.createElement('div');
                     evDiv.className = "cursor-pointer hover:bg-gray-100 rounded px-1 py-0.5 break-words";
+                    evDiv.style.fontSize = '10px';
+                    evDiv.style.color = '#374151'; // Explicitly set dark grey color
                     
-                    const displayTitle = ev.extendedProps.description 
-                        ? `${ev.title}(${ev.extendedProps.description})` 
-                        : ev.title;
+                    const displayTitle = (ev.extendedProps && ev.extendedProps.description)
+                        ? `· ${ev.title}(${ev.extendedProps.description})` 
+                        : `· ${ev.title}`;
                     
                     evDiv.textContent = displayTitle; 
                     evDiv.title = displayTitle;
