@@ -2092,6 +2092,7 @@ const App = {
             dayMaxEvents: false,
             weekends: false, 
             firstDay: 1, // Start on Monday
+            fixedWeekCount: false, // Hide rows that don't contain any current month days
             
             // Dynamic Fetching on View Change
             datesSet: async (info) => {
@@ -3917,7 +3918,8 @@ const App = {
             const availableTotal = windowHeight - rect.top;
 
             // Safety Margin (Buffer) to prevent accidental overflow
-            const safetyMargin = 30; 
+            // Reduced from 30 to 10 to minimize the "gap" at the bottom
+            const safetyMargin = 10; 
 
             // Sum up existing non-stretchable heights
             const toolbar = document.querySelector('.fc-header-toolbar');

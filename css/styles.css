@@ -44,6 +44,7 @@ html {
         min-height: 0;
         display: flex; /* Ensure FC fills it */
         flex-direction: column;
+        padding: 4px !important; /* Safety buffer to prevent border clipping at edges */
     }
 
     /* Force FullCalendar to use internal scroller by pinning height */
@@ -70,6 +71,7 @@ html {
     .fc .fc-scroller {
         overflow-y: auto !important;
         overflow-x: hidden !important;
+        padding-bottom: 0!important; /* Reduced to minimize extra scroll amount */
     }
 
     /* Prevent the column header (weekdays) from scrolling */
@@ -121,19 +123,28 @@ html {
 /* Apply rounded corners & shadow to the grid */
 .fc .fc-scrollgrid {
     border-radius: 12px !important;
-    /* overflow: hidden !important; REMOVED: Clipping bottom border */
+    overflow: hidden !important; /* Restore: Prevents background bleed at rounded corners */
     height: 100% !important;
     box-shadow:
         0 4px 6px -1px rgba(0, 0, 0, 0.1),
         0 2px 4px -1px rgba(0, 0, 0, 0.06);
     background: white;
-    border: 1px solid #e5e7eb;
+    /* ULTIMATE BORDER STABILITY: Separate model prevents collapse rendering errors */
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: none !important; 
+    border-top: 1px solid #d1d5db !important;
+    border-left: 1px solid #d1d5db !important;
 }
 
-/* Ensure the last row has a visible bottom border using inset shadow (cannot be clipped) */
-.fc .fc-daygrid-body tr:last-child .fc-daygrid-day {
-    box-shadow: inset 0 -1px 0 0 #e5e7eb !important;
-    border-bottom: none !important; /* Use shadow instead */
+/* Fundamental Border Fix: Unified grid lines using separate model */
+.fc .fc-daygrid-day,
+.fc .fc-col-header-cell {
+    border-right: 1px solid #d1d5db !important;
+    border-bottom: 1px solid #d1d5db !important;
+    border-top: none !important;
+    border-left: none !important;
+    box-shadow: none !important;
 }
 /* Ensure all day cells in a row have equal height and fill the row */
 .fc-daygrid-day-frame {
@@ -161,11 +172,35 @@ html {
     background-color: transparent;
 }
 
-/* Calendar Header Styling */
+/* Calendar Header Styling: Unified row background to prevent gaps */
 .fc-scrollgrid-section-header,
-.fc-col-header-cell {
+.fc-scrollgrid-section-header td,
+.fc-scrollgrid-section-header .fc-scroller-harness,
+.fc-scrollgrid-section-header .fc-scroller,
+.fc-col-header,
+.fc-col-header-cell,
+.fc-col-header-gutter {
     background-color: #ede9fe !important; /* purple-100 */
+}
+
+.fc-col-header-cell,
+.fc-col-header-gutter {
     padding: 8px 0 !important;
+    border-top: none !important; /* Grid provides top border */
+}
+
+/* Ensure gutter matches background and doesn't create extra borders */
+.fc-col-header-gutter {
+    border-right: none !important;
+    border-bottom: 1px solid #d1d5db !important;
+}
+
+/* Restore Rounded Corners specifically for the top header cells if they escape clipping */
+.fc-scrollgrid-section-header .fc-col-header-cell:first-child {
+    border-top-left-radius: 12px !important;
+}
+.fc-scrollgrid-section-header td:last-child {
+    border-top-right-radius: 12px !important;
 }
 
 /* Red Text for Sat/Sun Headers */
@@ -468,9 +503,11 @@ html {
         display: table !important; /* Critical for repeating headers */
         width: 100% !important;
         table-layout: fixed !important;
-        border-collapse: collapse !important;
+        border-collapse: separate !important;
         border-spacing: 0 !important;
-        border: none !important; /* BACK TO NONE: Use cell borders only to prevent trailing lines */
+        border: none !important; 
+        border-top: 1px solid #000 !important;
+        border-left: 1px solid #000 !important;
         border-radius: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -548,26 +585,18 @@ html {
         visibility: hidden !important;
     }
 
-    /* Row-Only & Column-Only Interior: Vertical and Horizontal Separators */
     .fc-col-header-cell,
     .fc-daygrid-day {
-        border-bottom: 0.5pt solid #d1d5db !important;
+        border-right: 1px solid #000 !important;
+        border-bottom: 1px solid #000 !important;
+        border-top: none !important;
+        border-left: none !important;
     }
 
-    .fc-col-header-cell:not(:last-child),
-    .fc-daygrid-day:not(:last-child) {
-        border-right: 0.5pt solid #d1d5db !important;
-    }
-
-    /* RECONSTRUCT OUTER FRAME ON CELLS: Prevents lines in empty space and ensures corners meet */
-    /* Side Edges */
+    /* Cleanup: Side Edges no longer needed separately in Separate model */
     .fc-col-header-cell:first-child,
     .fc-daygrid-day:first-child {
-        border-left: 1px solid #000 !important;
-    }
-    .fc-col-header-cell:last-child,
-    .fc-daygrid-day:last-child {
-        border-right: 1px solid #000 !important;
+        border-left: none !important;
     }
     
     /* Top Edge (Repeats on every page header) */
@@ -575,7 +604,7 @@ html {
         border-top: 1px solid #000 !important;
     }
 
-    /* Bottom Edge (Closing line at the very end) */
+    /* Bottom Edge cleanup */
     .fc-daygrid-body tr:last-child .fc-daygrid-day {
         border-bottom: 1px solid #000 !important;
     }
