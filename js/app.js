@@ -2200,21 +2200,54 @@ const App = {
                 await this.refreshCalendarData(info.start, info.end);
                 
                 this.distributeVerticalSpace();
+
+                // ROBUST SCROLL RESET: Ensure we start at the top
+                // Delay to ensure it runs after distributeVerticalSpace's RAF and internal resizing
+                setTimeout(() => {
+                    // 1. Main Content Container
+                    const mainContent = document.getElementById('main-content');
+                    if (mainContent) mainContent.scrollTop = 0;
+                    
+                    // 2. Window (Fallback)
+                    window.scrollTo(0, 0);
+
+                    // 3. FullCalendar Internal Scroller (The most likely culprit for daygrid overflow)
+                    const scrollers = document.querySelectorAll('.fc-scroller');
+                    scrollers.forEach(el => el.scrollTop = 0);
+                }, 100);
             },
 
             // Custom Classes for Red Dates
+            // Custom Classes for Red Dates & Other Month Dates
             dayCellClassNames: (arg) => {
+                const classes = [];
+                
+                // 1. Check for Other Month (Extended View only)
+                if (arg.view.type === 'extendedMonth') {
+                     const start = arg.view.activeStart.getTime();
+                     const end = arg.view.activeEnd.getTime();
+                     const middleTimestamp = (start + end) / 2;
+                     const middleDate = new Date(middleTimestamp);
+                     
+                     const currentMonth = middleDate.getMonth();
+                     const currentYear = middleDate.getFullYear();
+                     
+                     if (arg.date.getMonth() !== currentMonth || arg.date.getFullYear() !== currentYear) {
+                         classes.push('is-other-month');
+                     }
+                }
+
                 const dateStr = this.formatLocal(arg.date);
                 const data = this.state.calendarData || { redDayMap: {}, holidayMap: {} };
                 const day = arg.date.getDay();
                 
-                // 1. Forced Red (Holidays, Special Red Days)
-                if (data.redDayMap && data.redDayMap[dateStr]) return ['is-holiday'];
+                // 2. Forced Red (Holidays, Special Red Days)
+                if (data.redDayMap && data.redDayMap[dateStr]) classes.push('is-holiday');
                 
-                // 2. Weekends (Sunday=0, Saturday=6)
-                if (day === 0 || day === 6) return ['is-holiday'];
+                // 3. Weekends (Sunday=0, Saturday=6)
+                else if (day === 0 || day === 6) classes.push('is-holiday');
                 
-                return [];
+                return classes;
             },
 
             // Custom Content (Delegated to renderCalendarCell)
@@ -2246,9 +2279,10 @@ const App = {
         calendar.render();
         
         // Force size update for flexbox environments
+        // Force size update for flexbox environments
         setTimeout(() => {
              calendar.updateSize();
-             this.distributeVerticalSpace();
+             // distributeVerticalSpace is already called by datesSet, so we don't need it here
         }, 0);
 
         // 4. Weekend Toggle Initialization
@@ -3855,7 +3889,8 @@ const App = {
         dayLink.style.paddingLeft = '4px';
         dayLink.style.textDecoration = 'none';
         // Add three spaces before the day number as requested
-        dayLink.textContent = '\u00A0\u00A0\u00A0' + arg.dayNumberText;
+        // USER REQUEST: Always display only the day (e.g. "1일"), never the month (e.g. "1월 1일")
+        dayLink.textContent = '\u00A0\u00A0\u00A0' + arg.date.getDate() + '일';
         
         dateWrapper.appendChild(dayLink);
         headerRow.appendChild(dateWrapper);
@@ -3949,7 +3984,7 @@ const App = {
                 if (!hasPrintableInDept) deptDiv.classList.add('no-print');
                 
                 const deptHeader = document.createElement('div');
-                deptHeader.className = "font-bold mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis";
+                deptHeader.className = "dept-header font-bold mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis";
                 deptHeader.style.color = '#000'; 
                 // Displaying `◈ [dept_short]` format
                 const deptShort = group.info.dept_short || group.info.dept_name.substring(0, 2);
@@ -3958,7 +3993,7 @@ const App = {
 
                 group.events.forEach(ev => {
                     const evDiv = document.createElement('div');
-                    evDiv.className = "cursor-pointer hover:bg-gray-100 rounded px-1 py-0.5 break-words flex items-start leading-tight";
+                    evDiv.className = "schedule-item cursor-pointer hover:bg-gray-100 rounded px-1 py-0.5 break-words flex items-start leading-tight";
                     evDiv.style.fontSize = '10px';
                     evDiv.style.color = '#374151'; // Explicitly set dark grey color
 

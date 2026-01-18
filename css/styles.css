@@ -713,3 +713,13 @@ html {
 .fc-scroller::-webkit-scrollbar-thumb:hover {
     background-color: #9ca3af; /* gray-400 */
 }
+
+/* Dim styling for non-current month dates */
+.fc-day.is-other-month .fc-daygrid-day-number,
+.fc-day.is-other-month .holiday-name,
+.fc-day.is-other-month .schedule-item,
+.fc-day.is-other-month .schedule-item span,
+.fc-day.is-other-month .dept-header,
+.fc-day.is-other-month .dept-header span {
+    color: #9ca3af !important; /* gray-400 */
+}
