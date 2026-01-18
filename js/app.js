@@ -2894,7 +2894,7 @@ const App = {
         }
         
         // 1. Header
-        let headerHtml = `<tr><th class="col-date">날짜</th>`;
+        let headerHtml = `<tr><th class="col-date" style="padding: 0 4px; vertical-align: middle; box-shadow: inset 0 -5px 0 #6b7280; height: 50px; font-size: 9pt;">날짜</th>`;
         activeDepts.forEach(d => {
             const color = d.dept_color || '#ccc';
             headerHtml += `
