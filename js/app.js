@@ -2094,7 +2094,7 @@ const App = {
 
         // 2. Setup FullCalendar
         const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: window.innerWidth < 768 ? 'listWeek' : 'extendedMonth',
+            initialView: 'extendedMonth',
             locale: 'ko',
             buttonText: {
                 today: '오늘',
@@ -2323,8 +2323,6 @@ const App = {
             },
 
             windowResize: (view) => {
-                if (window.innerWidth < 768) calendar.changeView('listWeek');
-                else calendar.changeView('extendedMonth');
                 this.distributeVerticalSpace();
             },
             dateClick: (info) => {

@@ -47,19 +47,33 @@
 
     /* 4. FullCalendar Mobile Adjustments */
     .fc-toolbar {
-        flex-direction: column !important;
-        gap: 8px !important;
+        /* Restore horizontal layout by removing flex-direction: column */
+        flex-wrap: nowrap !important;
+        gap: 4px !important;
+        padding: 0 4px !important;
     }
 
     .fc-toolbar-title {
-        font-size: 1.1rem !important;
+        font-size: 1.0rem !important; /* Smaller title */
+    }
+
+    .fc-button {
+        width: auto !important;
+        height: 20px !important; /* Reduced height further */
+        min-height: 0 !important;
+        padding: 0 4px !important; /* Even tighter padding */
+        font-size: 0.75rem !important; /* Keep text size (approx 12px) */
+        line-height: 18px !important; /* Vertically center */
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .fc .fc-toolbar-chunk {
         display: flex;
         justify-content: center;
-        flex-wrap: wrap;
-        gap: 4px;
+        align-items: center;
+        gap: 2px;
     }
 
     /* Smaller fonts for calendar grid on mobile */
@@ -85,19 +99,17 @@
         grid-column: span 1 / span 1 !important;
     }
 
-    /* 6. Header / Navbar */
+    /* 6. Header / Navbar - Restored to Horizontal (Defaults work) */
     #main-header .max-w-7xl {
         height: auto !important;
-        padding-top: 8px !important;
-        padding-bottom: 8px !important;
-        flex-direction: column !important;
-        gap: 8px !important;
+        padding-top: 8px !important; /* Adjusted padding as requested */
+        padding-bottom: 8px !important; /* Adjusted padding as requested */
+        /* flex-direction: column removed */
     }
 
-    #auth-status {
-        width: 100%;
-        justify-content: center;
-    }
+    /* #auth-status override removed to allow horizontal flex */
+
+    /* Make buttons full width on small screens if needed */
 
     /* Make buttons full width on small screens if needed */
     .modal-footer button {
