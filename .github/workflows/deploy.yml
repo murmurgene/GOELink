@@ -5,26 +5,21 @@ on:
     branches:
       - main
 
-permissions:
-  contents: write
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout
+      - name: Checkout 🛎️
         uses: actions/checkout@v4
 
-      - name: Create config.js
-        run: |
-          mkdir -p js
-          echo "window.SUPABASE_CONFIG = {" > js/config.js
-          echo "    SUPABASE_URL: '${{ secrets.SUPABASE_URL }}'," >> js/config.js
-          echo "    SUPABASE_ANON_KEY: '${{ secrets.SUPABASE_ANON_KEY }}'" >> js/config.js
-          echo "};" >> js/config.js
-
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
+          token: ${{ secrets.DEPLOY_TOKEN }}
+          repository-name: pogokhi/pogokhi.github.io
+          branch: main # The branch where the static site is hosted
+          folder: . # Deploy the root directory
+          clean: true
+          single-commit: true
