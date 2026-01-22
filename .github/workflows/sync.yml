@@ -1,0 +1,21 @@
+name: Sync to Murmurgene
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    if: github.repository == 'pogokhi/GOELink'
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to Target Repository 🪞
+        run: |
+          git remote add target https://oauth2:${{ secrets.TARGET_REPO_PAT }}@github.com/murmurgene/GOELink.git
+          git push target main:main --force
