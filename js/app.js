@@ -529,7 +529,7 @@ const App = {
                     if (!confirm('로그아웃 하시겠습니까?')) return;
                     await window.SupabaseClient.supabase.auth.signOut();
                     this.clearCache();
-                    window.location.replace(window.location.pathname + '#calendar');
+                    window.location.reload();
                 };
             }
 
