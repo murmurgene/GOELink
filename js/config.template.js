@@ -1,4 +1,4 @@
 window.SUPABASE_CONFIG = {
-   SUPABASE_URL: "https://your-project-url.supabase.co",
-   SUPABASE_ANON_KEY: "your-anon-key...",
+   SUPABASE_URL: "%%SUPABASE_URL%%",
+   SUPABASE_ANON_KEY: "%%SUPABASE_ANON_KEY%%",
 };
