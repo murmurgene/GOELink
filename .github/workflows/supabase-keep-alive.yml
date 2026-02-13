@@ -1,0 +1,26 @@
+name: Supabase Keep Alive
+
+on:
+  schedule:
+    # Run at 00:00 UTC every day (Safe frequency to prevent 7-day or 30-day pause)
+    # User requested 15 days, but daily is safer and costs nothing for this tiny script.
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Ping Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: node scripts/keep_alive.js
