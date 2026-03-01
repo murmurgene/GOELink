@@ -1,0 +1,746 @@
+﻿/* 
+  PogokLink Global Styles 
+  (Tailwind is used for utility, this file is for specific overrides and complex components)
+*/
+
+/* Font Family */
+body {
+    font-family: "Noto Sans KR", sans-serif;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    height: 100%;
+}
+
+/* Ensure the app wrapper fills the screen */
+/* Ensure the app wrapper fills the screen but allows growth */
+#app,
+#view-container,
+#main-content,
+#form-container {
+    min-height: 100%;
+    /* Changed from height to min-height */
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+@media screen {
+
+    html,
+    body {
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        /* Prevent body scroll, use inner scroll */
+    }
+
+    #app {
+        height: 100%;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    /* Content wrapper: DISABLE SCROLL here, let FullCalendar handle it */
+    #main-content,
+    #view-container {
+        flex-grow: 1;
+        overflow: hidden !important;
+        /* Force hidden to contain interior scroll */
+        height: 100%;
+        min-height: 0;
+        display: flex;
+        /* Ensure FC fills it */
+        flex-direction: column;
+        padding: 4px !important;
+        /* Safety buffer to prevent border clipping at edges */
+    }
+
+    /* Force FullCalendar to use internal scroller by pinning height */
+    .fc {
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Ensure the view harness takes up the remaining space */
+    .fc-view-harness {
+        flex-grow: 1 !important;
+        height: 100% !important;
+        min-height: 0 !important;
+    }
+
+    /* Target the grid scroller specifically to keep header fixed */
+    .fc .fc-scroller-harness {
+        flex-grow: 1 !important;
+        height: 100% !important;
+        min-height: 0 !important;
+    }
+
+    .fc .fc-scroller {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding-bottom: 0 !important;
+        /* Reduced to minimize extra scroll amount */
+    }
+
+    /* Prevent the column header (weekdays) from scrolling */
+    .fc .fc-col-header-harness {
+        flex-shrink: 0 !important;
+    }
+}
+
+/* Calendar Overrides */
+.fc {
+    /* height: 100% !important; REMOVED: Allow auto height */
+    min-height: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    /* Removed card styles from here to exclude toolbar */
+    --fc-border-color: #e5e7eb;
+    /* gray-200 */
+    --fc-button-bg-color: #ffffff;
+    --fc-button-border-color: #d1d5db;
+    /* gray-300 */
+    --fc-button-text-color: #374151;
+    /* gray-700 */
+    --fc-button-hover-bg-color: #f3f4f6;
+    /* gray-50 */
+    --fc-button-hover-border-color: #9ca3af;
+    /* gray-400 */
+    --fc-button-active-bg-color: #e5e7eb;
+    /* gray-200 */
+    --fc-button-active-border-color: #6b7280;
+    /* gray-500 */
+    --fc-today-bg-color: #f5f3ff;
+    /* purple-100 (slightly more visible) */
+}
+
+/* Ensure all buttons (icons vs text) have equal height */
+.fc .fc-button {
+    height: 34px !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 12px !important;
+}
+
+/* Remove focus outline/shadow */
+.fc .fc-button:focus,
+.fc .fc-button:active,
+.fc .fc-button:focus-visible {
+    box-shadow: none !important;
+    outline: none !important;
+    border-color: var(--fc-border-color) !important;
+}
+
+/* Today Priority: Ensure today's color is always top priority */
+.fc .fc-day-today {
+    background-color: var(--fc-today-bg-color) !important;
+    z-index: 2 !important;
+    /* Above other day backgrounds */
+}
+
+/* Hide background events background color on today to let priority color show */
+.fc-day-today .holiday-bg-event,
+.fc-day-today .vacation-bg-event,
+.fc-day-today .event-exam-text,
+.fc-day-today .event-major-text {
+    background-color: transparent !important;
+}
+
+/* Apply rounded corners & shadow to the grid */
+.fc .fc-scrollgrid {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    /* Restore: Prevents background bleed at rounded corners */
+    height: 100% !important;
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    background: white;
+    /* ULTIMATE BORDER STABILITY: Separate model prevents collapse rendering errors */
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: none !important;
+    border-top: 1px solid #d1d5db !important;
+    border-left: 1px solid #d1d5db !important;
+}
+
+/* Fundamental Border Fix: Unified grid lines using separate model */
+.fc .fc-daygrid-day,
+.fc .fc-col-header-cell {
+    border-right: 1px solid #d1d5db !important;
+    border-bottom: 1px solid #d1d5db !important;
+    border-top: none !important;
+    border-left: none !important;
+    box-shadow: none !important;
+}
+
+/* Week Expansion Control: Hide/Show specific buffer rows */
+#calendar:not(.show-prev-week) .fc-row-prev-buffer {
+    display: none !important;
+}
+
+#calendar:not(.show-next-week) .fc-row-next-buffer {
+    display: none !important;
+}
+
+/* Ensure all day cells in a row have equal height and fill the row */
+.fc-daygrid-day-frame {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Hide the default events container to let custom content fill the height */
+.fc-daygrid-day-events {
+    min-height: 0 !important;
+}
+
+/* Ensure the main top container fills the frame */
+.fc-daygrid-day-top {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+}
+
+/* Gray background for days not in current month */
+/* Gray background removed as per request */
+.fc-day-other .fc-daygrid-day-frame {
+    background-color: transparent;
+}
+
+/* Calendar Header Styling: Unified row background to prevent gaps */
+.fc-scrollgrid-section-header,
+.fc-scrollgrid-section-header td,
+.fc-scrollgrid-section-header .fc-scroller-harness,
+.fc-scrollgrid-section-header .fc-scroller,
+.fc-col-header,
+.fc-col-header-cell,
+.fc-col-header-gutter {
+    background-color: #ede9fe !important;
+    /* purple-100 */
+}
+
+.fc-col-header-cell,
+.fc-col-header-gutter {
+    padding: 8px 0 !important;
+    border-top: none !important;
+    /* Grid provides top border */
+}
+
+/* Ensure gutter matches background and doesn't create extra borders */
+.fc-col-header-gutter {
+    border-right: none !important;
+    border-bottom: 1px solid #d1d5db !important;
+}
+
+/* Restore Rounded Corners specifically for the top header cells if they escape clipping */
+.fc-scrollgrid-section-header .fc-col-header-cell:first-child {
+    border-top-left-radius: 12px !important;
+}
+
+.fc-scrollgrid-section-header td:last-child {
+    border-top-right-radius: 12px !important;
+}
+
+/* Red Text for Sat/Sun Headers */
+.fc-col-header-cell.fc-day-sat,
+.fc-col-header-cell.fc-day-sun {
+    color: #dc2626 !important;
+    /* red-600 */
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.25rem;
+    /* text-xl */
+    font-weight: 700;
+}
+
+/* Ensure the calendar toolbar doesn't scroll */
+.fc-header-toolbar {
+    margin-bottom: 0.5rem !important;
+    padding: 2px 4px !important;
+}
+
+/* Event Styling */
+.fc-event {
+    cursor: pointer;
+    border: none;
+    padding: 1px 2px;
+    font-size: 0.85rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Background Events (Holidays, Exams, Major Events) */
+.holiday-bg-event,
+.vacation-bg-event,
+.event-exam-text,
+.event-major-text,
+.event-env-text,
+.event-term-text {
+    background-color: transparent !important;
+    border: none !important;
+    color: transparent !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    /* Ensure they don't block clicks */
+}
+
+/* 
+   Calendar Customization for User Request 
+   - Red dates for Sat/Sun/Holidays
+   - 10px date font, BOLD
+   - 8px holiday name, Darker
+*/
+
+/* Date Number Font Size & Weight */
+.fc .fc-daygrid-day-number {
+    font-size: 10px !important;
+    padding: 0 !important;
+    /* Offset managed via headerGroup paddingTop in JS */
+    font-weight: 800 !important;
+    /* Extra Bold */
+    color: #1f2937;
+    /* gray-800 default */
+
+    /* Ensure the wrapper fills the entire cell height for sticky tracking */
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    height: 100% !important;
+    width: 100% !important;
+    text-decoration: none !important;
+}
+
+/* Red Dates for Sundays ("fc-day-sun"), Saturdays ("fc-day-sat"), and Holidays ("is-holiday") */
+.fc-day-sun .fc-daygrid-day-number,
+.fc-day-sat .fc-daygrid-day-number,
+.is-holiday .fc-daygrid-day-number {
+    color: #dc2626 !important;
+    /* text-red-600 (darker red) */
+}
+
+/* Holiday Name (injected via JS for Calendar top) */
+.fc-daygrid-day-top .holiday-name {
+    font-size: 8px !important;
+    color: #374151;
+    /* text-gray-700 */
+    font-weight: 700 !important;
+    margin-right: 4px;
+    display: inline-block;
+    /* Removed max-width truncation to show full text */
+}
+
+/* Ensure day top flex alignment */
+/* Ensure day top fills the cell for custom rendering */
+/* Already handled above, keeping here for specificity if needed */
+.fc-daygrid-day-top {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    height: 100% !important;
+    width: 100% !important;
+    position: relative !important;
+    z-index: 5 !important;
+    min-height: 100% !important;
+    /* Force min-height */
+}
+
+/* Triangle indicator for days in the current month */
+.fc-daygrid-day:not(.fc-day-other):not(.is-other-month) .calendar-cell-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 10px 10px 0 0;
+    border-color: #6b7280 transparent transparent transparent;
+    /* Darker medium gray for workdays */
+    z-index: 10;
+}
+
+/* Red triangle for Sat/Sun/Holidays (only in current month) */
+.fc-day-sun:not(.fc-day-other):not(.is-other-month) .calendar-cell-header::before,
+.fc-day-sat:not(.fc-day-other):not(.is-other-month) .calendar-cell-header::before,
+.is-holiday:not(.fc-day-other):not(.is-other-month) .calendar-cell-header::before {
+    border-top-color: #dc2626 !important;
+}
+
+/* Ensure background events stay below */
+.fc-daygrid-day-bg {
+    z-index: 1 !important;
+}
+
+/* Default: Hide print-only header on screen */
+.print-only-header,
+.dept-name-short {
+    display: none !important;
+}
+
+/* 캘린더 타이틀 중첩 방지: MutationObserver와 함께 작동하여 중복 텍스트 발생 시 구조 제어 */
+.fc-toolbar-title {
+    display: block !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Mobile: Use short department names (dept-name-short) */
+@media screen and (max-width: 767px) {
+    .dept-name-full {
+        display: none !important;
+    }
+
+    .dept-name-short {
+        display: inline !important;
+    }
+}
+
+
+/* Custom Scrollbar Styling (Thinner) */
+.fc-scroller {
+    scrollbar-width: thin;
+    /* Firefox */
+    scrollbar-color: #d1d5db transparent;
+    /* Firefox */
+}
+
+/* Hide redundant scrollbar in the header row - BUT NOT IN PRINT */
+.fc-scrollgrid-section-header .fc-scroller {
+    overflow: hidden !important;
+}
+
+
+.fc-scroller::-webkit-scrollbar {
+    width: 6px;
+    /* Thinner vertical scrollbar */
+    height: 6px;
+    /* Thinner horizontal scrollbar */
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    /* gray-300 */
+    border-radius: 20px;
+    border: 1px solid transparent;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af;
+    /* gray-400 */
+}
+
+/* Dim styling for non-current month dates */
+.fc-day.is-other-month .fc-daygrid-day-number,
+.fc-day.is-other-month .holiday-name,
+.fc-day.is-other-month .schedule-item,
+.fc-day.is-other-month .schedule-item span,
+.fc-day.is-other-month .dept-header,
+.fc-day.is-other-month .dept-header span {
+    color: #9ca3af !important;
+    /* gray-400 */
+}
+
+/* --- List View Styles --- */
+
+.list-day-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 50px;
+}
+
+.list-dept-group {
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+#list-view-content-wrapper {
+    scrollbar-gutter: stable;
+}
+
+/* Print Specific for List View */
+
+/* --- Dept List View Table --- */
+#dept-view-table {
+    border-collapse: separate !important;
+    border-spacing: 0;
+    min-width: 100%;
+}
+
+#dept-view-table th,
+#dept-view-table td {
+    border: 1px solid #e5e7eb;
+    padding: 6px;
+    height: 50px;
+    vertical-align: top;
+    font-size: 0.875rem;
+}
+
+/* Date Column (Sticky) */
+#dept-view-table .col-date {
+    width: 50px;
+    min-width: 50px;
+    position: sticky;
+    left: 0;
+    z-index: 25;
+    background-color: #f9fafb;
+    text-align: center;
+    font-weight: bold;
+    border-right: 2px solid #d1d5db;
+    /* Stronger divide */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+    /* Visual layer separation */
+}
+
+/* Department Column */
+#dept-view-table .col-dept {
+    width: 150px;
+    min-width: 150px;
+    background-color: #fff;
+}
+
+/* Header Cells (Sticky) */
+#dept-view-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background-color: #f3f4f6;
+    color: #374151;
+    font-weight: 700;
+    text-align: center;
+    vertical-align: middle;
+    box-shadow: inset 0 -1px 0 #e5e7eb;
+    /* Keep internal border visible if needed */
+    font-size: 14px !important;
+    /* Unified header font size for screen (aligned with dept names) */
+}
+
+#dept-view-table thead .col-date {
+    z-index: 50;
+    /* Top-most corner cell */
+    left: 0;
+}
+
+/* Special Days */
+#dept-view-table tr.row-sunday {
+    background-color: #fef2f2;
+}
+
+#dept-view-table tr.row-saturday {
+    background-color: #eff6ff;
+}
+
+/* Final Solution: Gradient Background Divider (Bypasses border collapse & z-index issues) */
+/* Sunday: Draw 1px black line at the BOTTOM using background gradient */
+#dept-view-table tr.row-sunday td,
+#dept-view-table tr.row-sunday th,
+#dept-view-table tr.row-sunday .col-date {
+    background-image: linear-gradient(to top, #000000 1px, transparent 1px) !important;
+    background-size: 100% 100% !important;
+    background-repeat: no-repeat !important;
+    border-bottom: none !important;
+    /* Visual cleanup */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+/* Monday: Draw 1px black line at the TOP using background gradient */
+#dept-view-table tr.row-monday td,
+#dept-view-table tr.row-monday th,
+#dept-view-table tr.row-monday .col-date,
+#dept-view-table tr.row-sunday+tr td,
+#dept-view-table tr.row-sunday+tr th,
+#dept-view-table tr.row-sunday+tr .col-date {
+    background-image: linear-gradient(to bottom, #000000 1px, transparent 1px) !important;
+    background-size: 100% 100% !important;
+    background-repeat: no-repeat !important;
+    border-top: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+#dept-view-table tr.row-sunday .col-date {
+    color: #ef4444;
+    background-color: #fef2f2;
+}
+
+/* No need to re-declare background/borders for .col-date as they are included above */
+#dept-view-table tr.row-saturday .col-date {
+    color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+#dept-view-table tr.row-holiday .col-date {
+    color: #e11d48;
+    background-color: #fff1f2;
+}
+
+/* Event Item inside cell */
+.dept-event-item {
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    background-color: #f3f4f6;
+    border-left: 3px solid #9ca3af;
+    color: #374151;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    line-height: 1.2;
+}
+
+/* Print specific for Dept View */
+
+/* Mobile Calendar Horizontal Scroll */
+@media screen and (max-width: 768px) {
+
+    /* Unlock wrapper horizontal scroll (Syncs Header & Body) */
+    .fc-view-harness {
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory;
+    }
+
+    /* Force Table to Expand */
+    .fc .fc-scrollgrid,
+    .fc .fc-scrollgrid table {
+        width: auto !important;
+        min-width: 100% !important;
+    }
+
+    /* Cell Widths (3 days visible) */
+    .fc-col-header-cell,
+    .fc-daygrid-day {
+        min-width: 33.33vw !important;
+        max-width: 33.33vw !important;
+        flex: 0 0 33.33vw !important;
+        scroll-snap-align: start;
+    }
+
+    /* Disable internal horizontal scrollbars */
+    .fc-scroller {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+}
+
+/* --- Global Header Button Unification --- */
+#main-header .max-w-7xl {
+    height: 64px !important;
+    /* Standard Header Height */
+}
+
+#auth-status {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    /* Unified 6px gap */
+}
+
+#header-user-info,
+#view-actions,
+#header-auth-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+#btn-admin,
+#btn-logout,
+#btn-login,
+#btn-dept-calendar,
+#btn-list-calendar,
+#btn-print-modal,
+#btn-dept-print,
+#btn-list-print {
+    height: 32px !important;
+    padding: 0 12px !important;
+    /* Proper padding for text/icons */
+    font-size: 0.85rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    border-radius: 4px !important;
+    background-color: white !important;
+    border: 1px solid #d1d5db !important;
+}
+
+#btn-admin {
+    border-color: #e9d5ff !important;
+    /* purple-200 */
+    color: #7e22ce !important;
+    /* purple-700 */
+    background-color: #faf5ff !important;
+    /* purple-50 */
+}
+
+/* Specific button icons */
+.material-symbols-outlined {
+    font-size: 1.1rem !important;
+}
+
+/* responsive adjustment */
+@media (max-width: 640px) {
+    #main-header .max-w-7xl {
+        height: 52px !important;
+    }
+
+    #btn-admin,
+    #btn-logout,
+    #btn-login,
+    #btn-dept-calendar,
+    #btn-list-calendar {
+        height: 28px !important;
+        padding: 0 8px !important;
+        font-size: 0.8rem !important;
+    }
+}
+
+/* FullCalendar Cell Backgrounds (Applied via dayCellClassNames) */
+.calendar-cell-header {
+    background-color: #ffffff;
+}
+
+/* Opaque default to mask scrolling content */
+.fc-daygrid-day.is-holiday .calendar-cell-header {
+    background-color: #fef2f2 !important;
+}
+
+.fc-daygrid-day.is-vacation .calendar-cell-header {
+    background-color: #fffcfc !important;
+}
+
+.fc-daygrid-day.is-exam .calendar-cell-header {
+    background-color: #fff7ed !important;
+}
+
+.fc-daygrid-day.is-major .calendar-cell-header {
+    background-color: #eff6ff !important;
+}
+
+/* In Other Month days, we dim these backgrounds or force them white */
+.fc-daygrid-day.is-other-month.is-holiday .calendar-cell-header,
+.fc-daygrid-day.is-other-month.is-vacation .calendar-cell-header,
+.fc-daygrid-day.is-other-month.is-exam .calendar-cell-header,
+.fc-daygrid-day.is-other-month.is-major .calendar-cell-header {
+    background-color: #ffffff !important;
+}
+
+.is-holiday .fc-daygrid-day-number {
+    color: #dc2626 !important;
+}
