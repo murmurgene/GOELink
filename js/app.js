@@ -4708,6 +4708,7 @@ const App = {
         form.onsubmit = async (e) => {
             e.preventDefault();
 
+            try {
             const scheduleId = document.getElementById('schedule-id').value;
             const selectedDeptOption = deptSelect.options[deptSelect.selectedIndex];
             const deptName = selectedDeptOption ? selectedDeptOption.text : '';
@@ -4782,16 +4783,11 @@ const App = {
                 });
             }
 
-            try {
                 console.log("[Save] Starting save operation. isRecurring:", isRecurring, "scheduleId:", scheduleId);
                 console.log("[Save] Payload Preview:", batchData[0]);
 
-                // 1. [SECURITY/ROBUSTNESS] Explicitly check/refresh session before database operation
-                console.log("[Save] Validating session...");
-                const { data: { session }, error: authErr } = await window.SupabaseClient.supabase.auth.getSession();
-                if (authErr || !session) {
-                    throw new Error('인증 세션이 유효하지 않거나 만료되었습니다. 다시 로그인해 주세요.');
-                }
+                // 1. [REMOVED]
+                console.log("[Save] Preparing payload...");
 
                 let result;
                 if (scheduleId) {
