@@ -290,7 +290,7 @@ const App = {
     },
 
     refreshCurrentView: function () {
-        // [NUCLEAR OPTION] Full Reload with State
+        // [SOFT REFRESH] Update without full page reload
         // Save state
         const v = this.state.viewMode || 'calendar';
         let d = new Date();
@@ -303,13 +303,17 @@ const App = {
             } else if (this.state.initialDate) {
                 d = new Date(this.state.initialDate);
             }
-        } catch (e) { }
+        } catch (e) { console.warn("Date capture failed during refresh:", e); }
 
-        sessionStorage.setItem('pogok_reload_date', d.toISOString());
-        sessionStorage.setItem('pogok_reload_view', v);
+        // Clear schedules cache so it fetches fresh data
+        this.state.cache.schedules = null;
+        console.log(`[Refresh] Soft refreshing view: ${v}`);
 
-        // Force Reload
-        window.location.reload();
+        if (v === 'calendar' && this.state.calendar) {
+            this.state.calendar.refetchEvents();
+        } else {
+            this.loadView(v);
+        }
     },
 
     checkAuth: async function () {
@@ -4641,6 +4645,9 @@ const App = {
             } else {
                 includeHolidaysWrapper.classList.remove('hidden');
             }
+
+            // [BUGFIX] Explicitly clear schedule-id to prevent overwriting previous saves
+            document.getElementById('schedule-id').value = '';
 
             includeHolidaysCheck.checked = false; // Default: unchecked
             if (defaultDate) {
